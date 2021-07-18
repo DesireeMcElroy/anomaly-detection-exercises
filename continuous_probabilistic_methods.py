@@ -15,12 +15,18 @@ def get_lower_and_upper_bounds(df, k=1.5):
             IQR_value = quartile3 - quartile1
             lower_bound = (quartile1 - (k * IQR_value))
             upper_bound = (quartile3 + (k * IQR_value))
+            print('------------------------------------------------------')
             print(f'For {i} the lower bound is {lower_bound} and  upper bound is {upper_bound}')
+            outliers_lower = df[df[i] < lower_bound]
+            outliers_upper = df[df[i] > upper_bound]
+            outliers = pd.concat([outliers_lower, outliers_upper], axis=0)
+            print('')
+            print(outliers,'\n')
     else:
         print('')
-
+        
 # -------------------------------------------------------------------------------------
-
+        
 def visualize_get_lower_and_upper_bounds(df, k=1.5):
     '''
     calculates the lower and upper bound to locate outliers and displays them
@@ -32,7 +38,13 @@ def visualize_get_lower_and_upper_bounds(df, k=1.5):
             IQR_value = quartile3 - quartile1
             lower_bound = (quartile1 - (k * IQR_value))
             upper_bound = (quartile3 + (k * IQR_value))
+            print('------------------------------------------------------------------------------')
             print(f'For {i} the lower bound is {lower_bound} and  upper bound is {upper_bound}')
+            outliers_lower = df[df[i] < lower_bound]
+            outliers_upper = df[df[i] > upper_bound]
+            outliers = pd.concat([outliers_lower, outliers_upper], axis=0)
+            print('')
+            print(outliers,'\n')
             
             # get those visualizations going
             plt.figure(figsize=(16,4))
@@ -46,56 +58,22 @@ def visualize_get_lower_and_upper_bounds(df, k=1.5):
     else:
         print('')
 
-# -------------------------------------------------------------------------------------
-
-def get_low_and_up_bounds_df(df, k=1.5):
-    '''
-    This function takes in a pandas dataframe, list of columns, and k value, and will print out upper and lower bounds for each column.
-    It takes in a default argument of the col_list being all numeric columns, and the k value=1.5
-    '''
-    col_list=list(df.select_dtypes(include=['int', 'float'], exclude='O'))
-    for col in col_list:
-        # Find the lower and upper quartiles
-        q_25, q_75 = df[col].quantile([0.25, 0.75])
-        # Find the Inner Quartile Range
-        q_iqr = q_75 - q_25
-        # Find the Upper Bound
-        q_upper = q_75 + (k * q_iqr)
-        # Find the Lower Bound
-        q_lower = q_25 - (k * q_iqr)
-        # Identify outliers
-        outliers_lower = df[df[col] < q_lower]
-        outliers_upper = df[df[col] > q_upper]
-        outliers_all = pd.concat([outliers_lower, outliers_upper], axis=0)
-        print('')
-        print(col)
-        print(f'K: {k}')
-        print(f'Lower Fence: {q_lower}')
-        print(f'Upper Fence: {q_upper}')
-        print('')
-        print(f'Lower Outliers in {col}')
-        print('')
-        print(outliers_lower)
-        print('')
-        print(f'Upper Outliers in {col}')
-        print('')
-        print(outliers_upper)
-        print('')
-        print(f'All Outliers in {col}')
-        print('')
-        print(outliers_all)
-        plt.figure(figsize=(16,4))
-        plt.subplot(1, 2, 1)
-        sns.histplot(data = df, x = col, kde=True)
-        plt.title(col)
-        plt.subplot(1, 2, 2)
-        sns.boxplot(x=col, data=df)
-        plt.title(col)
-        plt.show()
-        print('-------------------------------------------------------------------')
-
 
 # -------------------------------------------------------------------------------------
+
+# create a function
+def sigma_outliers(df, sigma=2):
+    '''
+    This function takes in a dataframe and a sigma value and return outliers based off the parameters
+    '''
+
+    for i in df.columns:
+        
+        if df[i].dtypes != 'object':
+
+            print(df[pd.Series(stats.zscore(df[i])).abs()>sigma].sort_values(by=i))
+            print('----------------------------------------')
+
 
 
 def distplot(df, column):
